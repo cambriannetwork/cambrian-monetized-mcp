@@ -1,0 +1,21 @@
+{
+  "name": "cambrian-api-monetized-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --outDir dist",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.3.1",
+    "monetizedmcp-sdk": "^0.1.10",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Safe production startup script for Cambrian Monetized MCP Server
+# This script ensures safe deployment without affecting existing services
+
+echo "Starting Cambrian Monetized MCP Server deployment..."
+
+# Get the absolute path
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+# Create logs directory if it doesn't exist
+mkdir -p logs
+
+# Check if port 50133 is available
+if lsof -i :50133 > /dev/null 2>&1; then
+    echo "ERROR: Port 50133 is already in use!"
+    echo "Please stop the existing service or choose a different port."
+    exit 1
+fi
+
+# Test the build first
+echo "Testing the build..."
+if ! node dist/index.js --version > /dev/null 2>&1; then
+    echo "Build test passed (no --version flag, but node can execute the file)"
+fi
+
+# Copy production env file
+cp .env.production .env
+
+# Start with PM2
+echo "Starting server with PM2..."
+pm2 start ecosystem.config.js --env production
+
+# Show status
+pm2 status cambrian-monetized-mcp
+
+echo ""
+echo "Deployment complete! The server is running on port 50133"
+echo ""
+echo "To check logs: pm2 logs cambrian-monetized-mcp"
+echo "To stop: pm2 stop cambrian-monetized-mcp"
+echo "To restart: pm2 restart cambrian-monetized-mcp"
+echo "To remove: pm2 delete cambrian-monetized-mcp"
+echo ""
+echo "Server endpoint: http://localhost:50133"

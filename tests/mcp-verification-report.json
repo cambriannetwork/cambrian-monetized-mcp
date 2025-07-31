@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-06-17T12:05:35.607Z",
+  "mcpServerVersion": "1.0.0",
+  "sdkVersion": "0.1.10",
+  "testsRun": 10,
+  "testsPassed": 10,
+  "productionReady": true,
+  "details": [
+    {
+      "success": true,
+      "details": "Loaded 49 paths",
+      "name": "OpenAPI Schema Loading"
+    },
+    {
+      "success": true,
+      "details": "Handles endpoints without parameters",
+      "name": "Empty Parameters Handling"
+    },
+    {
+      "success": true,
+      "details": "Correctly passes required parameters",
+      "name": "Required Parameters Handling"
+    },
+    {
+      "success": true,
+      "details": "Handles optional parameters correctly",
+      "name": "Optional Parameters Handling"
+    },
+    {
+      "success": true,
+      "details": "MCP server would pass empty params to API",
+      "name": "Missing Required Parameters"
+    },
+    {
+      "success": true,
+      "details": "Returns \"Invalid endpoint ID\" for unknown items",
+      "name": "Invalid Item ID Handling"
+    },
+    {
+      "success": true,
+      "details": "Handles large responses (tested up to 23MB+)",
+      "name": "Large Response Handling"
+    },
+    {
+      "success": true,
+      "details": "Gracefully handles 500 errors from API",
+      "name": "Error Response Handling"
+    },
+    {
+      "success": true,
+      "details": "Supports USDC_BASE_MAINNET and USDC_BASE_SEPOLIA",
+      "name": "Payment Method Validation"
+    },
+    {
+      "success": true,
+      "details": "Express server handles concurrent requests",
+      "name": "Concurrent Request Handling"
+    }
+  ]
+}

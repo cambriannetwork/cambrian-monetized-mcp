@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Direct production startup script for Cambrian Monetized MCP Server
+# IMPORTANT: Copy this file to start-production-direct.sh and add your credentials
+
+echo "Starting Cambrian Monetized MCP Server..."
+
+# Get the absolute path
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+# Create logs directory if it doesn't exist
+mkdir -p logs
+
+# Check if port 50133 is available
+if lsof -i :50133 > /dev/null 2>&1; then
+    echo "ERROR: Port 50133 is already in use!"
+    exit 1
+fi
+
+# Copy production env
+cp .env.production .env
+
+# Start with PM2 using direct command
+# IMPORTANT: Replace these placeholder values with your actual credentials:
+# - YOUR_CAMBRIAN_API_KEY: Your actual Cambrian API key
+# - YOUR_PAYMENT_RECIPIENT: Your wallet address (default: 0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3)
+PORT=50133 CAMBRIAN_API_KEY="YOUR_CAMBRIAN_API_KEY" CAMBRIAN_API_BASE_URL="https://opabinia.cambrian.org" PAYMENT_RECIPIENT="YOUR_PAYMENT_RECIPIENT" pm2 start dist/index.js --name "cambrian-monetized-mcp" --time
+
+# Wait for startup
+sleep 2
+
+# Show status
+pm2 status cambrian-monetized-mcp
+
+# Test the server
+echo ""
+echo "Testing server endpoint..."
+curl -s http://localhost:50133 > /dev/null 2>&1 && echo "✓ Server is responding" || echo "✗ Server not responding yet"
+
+echo ""
+echo "Deployment complete!"
+echo "Server running on: http://localhost:50133"
+echo ""
+echo "Commands:"
+echo "  Logs: pm2 logs cambrian-monetized-mcp"
+echo "  Stop: pm2 stop cambrian-monetized-mcp"
+echo "  Restart: pm2 restart cambrian-monetized-mcp"
+echo "  Status: pm2 status cambrian-monetized-mcp"

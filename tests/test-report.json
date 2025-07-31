@@ -1,0 +1,142 @@
+{
+  "timestamp": "2025-06-17T11:54:32.433Z",
+  "summary": {
+    "totalEndpoints": 24,
+    "successful": 5,
+    "timeouts": 0,
+    "notFound": 7,
+    "serverErrors": 12,
+    "dataTypeIssues": 0,
+    "formatIssues": 0
+  },
+  "details": {
+    "timeout": [],
+    "notFound": [
+      {
+        "endpoint": "EVM Price History Day",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "EVM Uniswap V2 Pools",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "Solana Token Info",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "Solana Jupiter Pools",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "Solana Raydium CPMM Pools",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "Solana Orca Pools",
+        "message": "Not found"
+      },
+      {
+        "endpoint": "Solana Meteora Pools",
+        "message": "Not found"
+      }
+    ],
+    "serverError": [
+      {
+        "endpoint": "EVM DEXes",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "EVM Tokens",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "EVM Current Price",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "EVM Price History Hour",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "EVM TVL Top",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "EVM TVL Status",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Current Price",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Price History Hour",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Trending Tokens",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Holder Balances",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Raydium CLMM Pools",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      },
+      {
+        "endpoint": "Solana Pools Fee Ranges",
+        "status": 500,
+        "message": "Request failed with status code 500"
+      }
+    ],
+    "dataTypeIssues": [],
+    "successful": [
+      {
+        "endpoint": "EVM Chains",
+        "responseTime": 339,
+        "dataType": "CambrianFormat[1 rows]",
+        "isCambrianFormat": true
+      },
+      {
+        "endpoint": "EVM Uniswap V3 Pools",
+        "responseTime": 1106,
+        "dataType": "CambrianFormat[4772 rows]",
+        "isCambrianFormat": true
+      },
+      {
+        "endpoint": "EVM Aerodrome V2 Pools",
+        "responseTime": 3185,
+        "dataType": "CambrianFormat[10 rows]",
+        "isCambrianFormat": true
+      },
+      {
+        "endpoint": "Solana Latest Block",
+        "responseTime": 370,
+        "dataType": "CambrianFormat[1 rows]",
+        "isCambrianFormat": true
+      },
+      {
+        "endpoint": "Solana Tokens",
+        "responseTime": 23601,
+        "dataType": "CambrianFormat[11 rows]",
+        "isCambrianFormat": true
+      }
+    ],
+    "unexpectedFormat": []
+  },
+  "productionReady": false
+}
