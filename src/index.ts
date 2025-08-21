@@ -122,10 +122,6 @@ export class MCPServer extends MonetizedMCPServer {
         walletAddress,
         paymentMethod: PaymentMethods.USDC_BASE_MAINNET,
       },
-      {
-        walletAddress,
-        paymentMethod: PaymentMethods.USDC_BASE_SEPOLIA,
-      },
     ]);
   }
   
