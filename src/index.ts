@@ -199,23 +199,13 @@ export class MCPServer extends MonetizedMCPServer {
         }
         
         try {
-          const headers: any = {
-            'Accept': 'application/json',
-          };
-          
-          // Add API key if available
-          if (process.env.CAMBRIAN_API_KEY) {
-            headers['X-API-KEY'] = process.env.CAMBRIAN_API_KEY;
-            headers['Authorization'] = `Bearer ${process.env.CAMBRIAN_API_KEY}`;
-          }
-          
-          console.log('Making API call to:', apiUrl);
-          console.log('Headers included:', Object.keys(headers));
-          
           const response = await axios({
             method: endpoint.method,
             url: apiUrl,
-            headers,
+            headers: {
+              'X-API-KEY': process.env.CAMBRIAN_API_KEY,
+              'Accept': 'application/json',
+            },
             timeout: 30000,
           });
           
