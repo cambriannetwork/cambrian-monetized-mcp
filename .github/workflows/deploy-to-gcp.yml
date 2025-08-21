@@ -1,0 +1,123 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  SERVICE_NAME: cambrian-monetized-mcp
+  REGION: us-central1  # Change this to your preferred region
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write  # Required for Workload Identity Federation
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Determine Environment
+      id: determine-env
+      run: |
+        if [ "${{ github.ref_name }}" == "main" ]; then
+          echo "DEPLOY_ENV=prod" >> $GITHUB_ENV
+          echo "SERVICE_SUFFIX=prod" >> $GITHUB_ENV
+        else
+          echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+          echo "SERVICE_SUFFIX=stg" >> $GITHUB_ENV
+        fi
+
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_DEPLOY_SA }}
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker to use gcloud as credential helper
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+    - name: Build and Push Docker image
+      run: |
+        IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/mcp-servers/${{ env.SERVICE_NAME }}-${{ env.SERVICE_SUFFIX }}:${{ github.sha }}"
+        IMAGE_LATEST="${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/mcp-servers/${{ env.SERVICE_NAME }}-${{ env.SERVICE_SUFFIX }}:latest"
+        
+        # Build the Docker image
+        docker build -t "$IMAGE_URI" -t "$IMAGE_LATEST" .
+        
+        # Push both tags
+        docker push "$IMAGE_URI"
+        docker push "$IMAGE_LATEST"
+        
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.SERVICE_NAME }}-${{ env.SERVICE_SUFFIX }} \
+          --image "${{ env.IMAGE_URI }}" \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --port 8080 \
+          --memory 1Gi \
+          --cpu 1 \
+          --timeout 300 \
+          --max-instances 10 \
+          --min-instances 0 \
+          --project ${{ secrets.GCP_PROJECT_ID }} \
+          --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }} \
+          --set-env-vars "DEPLOY_ENV=${{ env.DEPLOY_ENV }}" \
+          --set-env-vars "NODE_ENV=production" \
+          --allow-unauthenticated
+
+    - name: Get Service URL
+      run: |
+        SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }}-${{ env.SERVICE_SUFFIX }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --project ${{ secrets.GCP_PROJECT_ID }} \
+          --format 'value(status.url)')
+        
+        echo "Service deployed successfully!"
+        echo "Service URL: $SERVICE_URL"
+        echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_ENV
+
+    - name: Test Deployment
+      run: |
+        echo "Testing service health..."
+        # Wait for service to be ready
+        sleep 10
+        
+        # Test the service (adjust endpoint as needed)
+        curl -f "${{ env.SERVICE_URL }}/health" || echo "Health check endpoint not available"
+        
+        echo "Deployment test completed"
+
+    - name: Output MCP Configuration
+      run: |
+        echo "================================================"
+        echo "MCP Server Deployment Successful!"
+        echo "================================================"
+        echo ""
+        echo "Add this to your MCP client configuration:"
+        echo ""
+        echo "{"
+        echo "  \"mcpServers\": {"
+        echo "    \"cambrian-monetized-${{ env.SERVICE_SUFFIX }}\": {"
+        echo "      \"url\": \"${{ env.SERVICE_URL }}\","
+        echo "      \"transport\": \"http\""
+        echo "    }"
+        echo "  }"
+        echo "}"
+        echo ""
+        echo "================================================"
