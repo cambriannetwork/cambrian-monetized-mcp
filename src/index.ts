@@ -105,7 +105,7 @@ export class MCPServer extends MonetizedMCPServer {
         name: endpoint.name,
         description: endpoint.description,
         price: {
-          amount: 0.03,
+          amount: 0.001,
           currency: "USDC",
           paymentMethod: PaymentMethods.USDC_BASE_MAINNET,
         },
@@ -148,8 +148,8 @@ export class MCPServer extends MonetizedMCPServer {
       }
       
       const paymentTools = new PaymentsTools();
-      const amount = 0.03; // All endpoints cost $0.03
-      // Processing payment for amount: $0.03
+      const amount = 0.001; // All endpoints cost $0.001 USDC
+      // Processing payment for amount: $0.001
       
       
       // Build the resource URL for this specific endpoint
