@@ -78,6 +78,8 @@ jobs:
           --service-account ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }} \
           --set-env-vars "DEPLOY_ENV=${{ env.DEPLOY_ENV }}" \
           --set-env-vars "NODE_ENV=production" \
+          --set-env-vars "CDP_API_KEY_ID=${{ secrets.CDP_API_KEY_ID }}" \
+          --set-env-vars "CDP_API_KEY_SECRET=${{ secrets.CDP_API_KEY_SECRET }}" \
           --allow-unauthenticated
 
     - name: Get Service URL
