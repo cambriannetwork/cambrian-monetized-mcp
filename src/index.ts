@@ -12,6 +12,10 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 import { webcrypto } from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 // Make crypto available globally for CDP SDK
 if (typeof globalThis.crypto === 'undefined') {
@@ -29,17 +33,38 @@ interface CambrianEndpoint {
   params: Record<string, string>;
 }
 
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 // Store loaded endpoints
 let cambrianEndpoints: CambrianEndpoint[] = [];
 
-// Load Cambrian endpoints from OpenAPI
+// Load Cambrian endpoints from local file or OpenAPI
 async function loadCambrianEndpoints() {
+  // First, try to load from local file
+  try {
+    const localPath = path.join(__dirname, '..', 'cambrian-openapi.json');
+    console.log(`Checking for local OpenAPI file at: ${localPath}`);
+    
+    if (fs.existsSync(localPath)) {
+      console.log("Loading from local OpenAPI file...");
+      const fileContent = fs.readFileSync(localPath, 'utf8');
+      const schema = JSON.parse(fileContent);
+      processSchema(schema);
+      return;
+    }
+  } catch (error: any) {
+    console.log("Local file not found or invalid, trying remote...");
+  }
+  
+  // If local file doesn't work, try remote
   let retries = 3;
   let lastError: any = null;
   
   while (retries > 0) {
     try {
-      console.log(`Loading Cambrian API endpoints from OpenAPI schema... (attempt ${4 - retries}/3)`);
+      console.log(`Loading Cambrian API endpoints from remote OpenAPI... (attempt ${4 - retries}/3)`);
       const response = await axios.get("https://opabinia.cambrian.org/openapi.json", {
         timeout: 15000,
         headers: {
@@ -49,34 +74,9 @@ async function loadCambrianEndpoints() {
         validateStatus: (status) => status < 500 // Accept any status < 500
       });
     
-    console.log("OpenAPI schema fetched successfully");
-    const schema = response.data;
-    
-    const endpoints: CambrianEndpoint[] = [];
-    let idCounter = 1;
-    
-    for (const [path, pathItem] of Object.entries(schema.paths || {}) as [string, any][]) {
-      for (const [method, operation] of Object.entries(pathItem)) {
-        if (!operation || typeof operation !== 'object') continue;
-        
-        const op = operation as any;
-        endpoints.push({
-          id: op.operationId || `endpoint-${idCounter++}`,
-          name: op.summary || `${method.toUpperCase()} ${path}`,
-          description: op.description || `Access ${path}`,
-          path: path,
-          method: method.toUpperCase(),
-          params: op.parameters?.reduce((acc: any, param: any) => {
-            acc[param.name] = param.description || param.name;
-            return acc;
-          }, {}) || {}
-        });
-      }
-    }
-    
-      cambrianEndpoints = endpoints;
-      console.log(`Successfully loaded ${endpoints.length} Cambrian API endpoints`);
-      return; // Success, exit the function
+      console.log("OpenAPI schema fetched successfully from remote");
+      processSchema(response.data);
+      return;
     } catch (error: any) {
       lastError = error;
       retries--;
@@ -95,33 +95,61 @@ async function loadCambrianEndpoints() {
   console.log("Using fallback endpoints");
   cambrianEndpoints = [
     {
-        id: "solanalatestblock",
-        name: "Latest Block",
-        description: "Get the latest Solana block number and time",
-        path: "/api/v1/solana/latest-block",
-        method: "GET",
-        params: {}
-      },
-      {
-        id: "solanapricecurrent",
-        name: "Token Price (Current)",
-        description: "Get current price for a Solana token",
-        path: "/api/v1/solana/price/current",
-        method: "GET",
-        params: {
-          token_address: "Token address (base58)"
-        }
-      },
-      {
-        id: "evm-chains",
-        name: "Get EVM Chains",
-        description: "List all supported EVM chains",
-        path: "/api/v1/evm/chains",
-        method: "GET",
-        params: {}
+      id: "solanalatestblock",
+      name: "Latest Block",
+      description: "Get the latest Solana block number and time",
+      path: "/api/v1/solana/latest-block",
+      method: "GET",
+      params: {}
+    },
+    {
+      id: "solanapricecurrent",
+      name: "Token Price (Current)",
+      description: "Get current price for a Solana token",
+      path: "/api/v1/solana/price/current",
+      method: "GET",
+      params: {
+        token_address: "Token address (base58)"
       }
-    ];
-    console.log(`Loaded ${cambrianEndpoints.length} fallback endpoints`);
+    },
+    {
+      id: "evm-chains",
+      name: "Get EVM Chains",
+      description: "List all supported EVM chains",
+      path: "/api/v1/evm/chains",
+      method: "GET",
+      params: {}
+    }
+  ];
+  console.log(`Loaded ${cambrianEndpoints.length} fallback endpoints`);
+}
+
+// Process the OpenAPI schema
+function processSchema(schema: any) {
+  const endpoints: CambrianEndpoint[] = [];
+  let idCounter = 1;
+  
+  for (const [path, pathItem] of Object.entries(schema.paths || {}) as [string, any][]) {
+    for (const [method, operation] of Object.entries(pathItem)) {
+      if (!operation || typeof operation !== 'object') continue;
+      
+      const op = operation as any;
+      endpoints.push({
+        id: op.operationId || `endpoint-${idCounter++}`,
+        name: op.summary || `${method.toUpperCase()} ${path}`,
+        description: op.description || `Access ${path}`,
+        path: path,
+        method: method.toUpperCase(),
+        params: op.parameters?.reduce((acc: any, param: any) => {
+          acc[param.name] = param.description || param.name;
+          return acc;
+        }, {}) || {}
+      });
+    }
+  }
+  
+  cambrianEndpoints = endpoints;
+  console.log(`Successfully loaded ${endpoints.length} Cambrian API endpoints`);
 }
 
 export class MCPServer extends MonetizedMCPServer {
