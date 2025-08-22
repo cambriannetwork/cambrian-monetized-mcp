@@ -12,10 +12,6 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
 import { webcrypto } from "crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 // Make crypto available globally for CDP SDK
 if (typeof globalThis.crypto === 'undefined') {
@@ -33,57 +29,57 @@ interface CambrianEndpoint {
   params: Record<string, string>;
 }
 
-// Get the directory of the current module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 // Store loaded endpoints
 let cambrianEndpoints: CambrianEndpoint[] = [];
+let lastSuccessfulLoad: Date | null = null;
+let refreshInterval: NodeJS.Timeout | null = null;
 
-// Load Cambrian endpoints from local file or OpenAPI
-async function loadCambrianEndpoints() {
-  // First, try to load from local file
-  try {
-    const localPath = path.join(__dirname, '..', 'cambrian-openapi.json');
-    console.log(`Checking for local OpenAPI file at: ${localPath}`);
-    
-    if (fs.existsSync(localPath)) {
-      console.log("Loading from local OpenAPI file...");
-      const fileContent = fs.readFileSync(localPath, 'utf8');
-      const schema = JSON.parse(fileContent);
-      processSchema(schema);
-      return;
-    }
-  } catch (error: any) {
-    console.log("Local file not found or invalid, trying remote...");
-  }
-  
-  // If local file doesn't work, try remote
+// Load Cambrian endpoints from OpenAPI with automatic refresh
+async function loadCambrianEndpoints(isRefresh: boolean = false) {
   let retries = 3;
   let lastError: any = null;
   
   while (retries > 0) {
     try {
-      console.log(`Loading Cambrian API endpoints from remote OpenAPI... (attempt ${4 - retries}/3)`);
+      const attemptMsg = isRefresh ? "Refreshing" : "Loading";
+      console.log(`${attemptMsg} Cambrian API endpoints from OpenAPI... (attempt ${4 - retries}/3)`);
+      
       const response = await axios.get("https://opabinia.cambrian.org/openapi.json", {
-        timeout: 15000,
+        timeout: 20000,
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'cambrian-mcp-server/1.0'
+          'User-Agent': 'cambrian-mcp-server/1.0',
+          'Cache-Control': 'no-cache'
         },
-        validateStatus: (status) => status < 500 // Accept any status < 500
+        validateStatus: (status) => status < 500
       });
     
-      console.log("OpenAPI schema fetched successfully from remote");
+      console.log(`OpenAPI schema fetched successfully at ${new Date().toISOString()}`);
       processSchema(response.data);
+      lastSuccessfulLoad = new Date();
+      
+      // Set up hourly refresh if not already set
+      if (!refreshInterval) {
+        refreshInterval = setInterval(() => {
+          console.log("Starting hourly refresh of OpenAPI endpoints...");
+          loadCambrianEndpoints(true).catch(err => {
+            console.error("Hourly refresh failed:", err.message);
+          });
+        }, 60 * 60 * 1000); // Refresh every hour
+        console.log("Hourly refresh scheduled");
+      }
+      
       return;
     } catch (error: any) {
       lastError = error;
       retries--;
       console.error(`Failed to load endpoints (${retries} retries left):`, error.message);
+      console.error(`Error type: ${error.code}, Status: ${error.response?.status}`);
+      
       if (retries > 0) {
-        console.log("Waiting 2 seconds before retry...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const waitTime = (4 - retries) * 2000; // Progressive backoff: 2s, 4s, 6s
+        console.log(`Waiting ${waitTime/1000} seconds before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
   }
@@ -91,7 +87,14 @@ async function loadCambrianEndpoints() {
   // All retries failed
   console.error("All attempts failed. Last error:", lastError?.message);
   console.error("Error details:", lastError?.response?.status, lastError?.response?.data);
-  // Use fallback endpoints with common Solana endpoints
+  
+  // If this is a refresh and we have existing endpoints, keep them
+  if (isRefresh && cambrianEndpoints.length > 0) {
+    console.log(`Refresh failed, keeping existing ${cambrianEndpoints.length} endpoints from ${lastSuccessfulLoad}`);
+    return;
+  }
+  
+  // Use fallback endpoints for initial load
   console.log("Using fallback endpoints");
   cambrianEndpoints = [
     {
@@ -153,6 +156,18 @@ function processSchema(schema: any) {
 }
 
 export class MCPServer extends MonetizedMCPServer {
+  // Add health check endpoint
+  getHealthStatus() {
+    return {
+      status: cambrianEndpoints.length > 0 ? 'healthy' : 'degraded',
+      endpointsLoaded: cambrianEndpoints.length,
+      lastSuccessfulLoad: lastSuccessfulLoad?.toISOString() || 'never',
+      nextRefresh: lastSuccessfulLoad ? 
+        new Date(lastSuccessfulLoad.getTime() + 60 * 60 * 1000).toISOString() : 
+        'not scheduled'
+    };
+  }
+  
   pricingListing(
     pricingListingRequest: PriceListingRequest
   ): Promise<PriceListingResponse> {
