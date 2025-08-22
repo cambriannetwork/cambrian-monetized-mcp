@@ -34,9 +34,22 @@ let cambrianEndpoints: CambrianEndpoint[] = [];
 
 // Load Cambrian endpoints from OpenAPI
 async function loadCambrianEndpoints() {
-  try {
-    // Loading Cambrian API endpoints from OpenAPI schema
-    const response = await axios.get("https://opabinia.cambrian.org/openapi.json");
+  let retries = 3;
+  let lastError: any = null;
+  
+  while (retries > 0) {
+    try {
+      console.log(`Loading Cambrian API endpoints from OpenAPI schema... (attempt ${4 - retries}/3)`);
+      const response = await axios.get("https://opabinia.cambrian.org/openapi.json", {
+        timeout: 15000,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'cambrian-mcp-server/1.0'
+        },
+        validateStatus: (status) => status < 500 // Accept any status < 500
+      });
+    
+    console.log("OpenAPI schema fetched successfully");
     const schema = response.data;
     
     const endpoints: CambrianEndpoint[] = [];
@@ -61,12 +74,44 @@ async function loadCambrianEndpoints() {
       }
     }
     
-    cambrianEndpoints = endpoints;
-    // Successfully loaded endpoints
-  } catch (error) {
-    console.error("Failed to load Cambrian endpoints:", error);
-    // Use fallback endpoints
-    cambrianEndpoints = [
+      cambrianEndpoints = endpoints;
+      console.log(`Successfully loaded ${endpoints.length} Cambrian API endpoints`);
+      return; // Success, exit the function
+    } catch (error: any) {
+      lastError = error;
+      retries--;
+      console.error(`Failed to load endpoints (${retries} retries left):`, error.message);
+      if (retries > 0) {
+        console.log("Waiting 2 seconds before retry...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+  
+  // All retries failed
+  console.error("All attempts failed. Last error:", lastError?.message);
+  console.error("Error details:", lastError?.response?.status, lastError?.response?.data);
+  // Use fallback endpoints with common Solana endpoints
+  console.log("Using fallback endpoints");
+  cambrianEndpoints = [
+    {
+        id: "solanalatestblock",
+        name: "Latest Block",
+        description: "Get the latest Solana block number and time",
+        path: "/api/v1/solana/latest-block",
+        method: "GET",
+        params: {}
+      },
+      {
+        id: "solanapricecurrent",
+        name: "Token Price (Current)",
+        description: "Get current price for a Solana token",
+        path: "/api/v1/solana/price/current",
+        method: "GET",
+        params: {
+          token_address: "Token address (base58)"
+        }
+      },
       {
         id: "evm-chains",
         name: "Get EVM Chains",
@@ -74,20 +119,9 @@ async function loadCambrianEndpoints() {
         path: "/api/v1/evm/chains",
         method: "GET",
         params: {}
-      },
-      {
-        id: "uniswap-v3-pools",
-        name: "Get Uniswap V3 Pools",
-        description: "Get all pools for a token on Uniswap V3",
-        path: "/api/v1/evm/uniswap/v3/pools",
-        method: "GET",
-        params: {
-          chain: "Chain ID (e.g., 8453 for Base)",
-          token: "Token address"
-        }
       }
     ];
-  }
+    console.log(`Loaded ${cambrianEndpoints.length} fallback endpoints`);
 }
 
 export class MCPServer extends MonetizedMCPServer {
