@@ -171,9 +171,17 @@ export class MCPServer extends MonetizedMCPServer {
   pricingListing(
     pricingListingRequest: PriceListingRequest
   ): Promise<PriceListingResponse> {
+    console.log(`PricingListing called with query: "${pricingListingRequest.searchQuery}", Available endpoints: ${cambrianEndpoints.length}`);
+    
+    // Log first few endpoint IDs for debugging
+    if (cambrianEndpoints.length > 0) {
+      console.log('Sample endpoint IDs:', cambrianEndpoints.slice(0, 5).map(e => e.id));
+    }
+    
     const filteredItems = cambrianEndpoints
       .filter(endpoint => 
         !pricingListingRequest.searchQuery || 
+        endpoint.id.toLowerCase().includes(pricingListingRequest.searchQuery.toLowerCase()) ||
         endpoint.name.toLowerCase().includes(pricingListingRequest.searchQuery.toLowerCase()) ||
         endpoint.description.toLowerCase().includes(pricingListingRequest.searchQuery.toLowerCase())
       )
@@ -189,6 +197,7 @@ export class MCPServer extends MonetizedMCPServer {
         params: endpoint.params,
       }));
     
+    console.log(`Returning ${filteredItems.length} filtered items`);
     return Promise.resolve({ items: filteredItems });
   }
   
@@ -206,17 +215,20 @@ export class MCPServer extends MonetizedMCPServer {
     purchaseRequest: MakePurchaseRequest
   ): Promise<MakePurchaseResponse> {
     try {
-      // Process purchase request
+      console.log(`MakePurchase called for itemId: "${purchaseRequest.itemId}"`);
+      console.log(`Available endpoints: ${cambrianEndpoints.length}`);
+      console.log('All endpoint IDs:', cambrianEndpoints.map(e => e.id));
       
       // Find the endpoint being purchased
       const endpoint = cambrianEndpoints.find(e => e.id === purchaseRequest.itemId);
       
       if (!endpoint) {
+        console.error(`Endpoint not found: ${purchaseRequest.itemId}`);
         return Promise.resolve({
           purchasableItemId: purchaseRequest.itemId,
           makePurchaseRequest: purchaseRequest,
           orderId: uuidv4(),
-          toolResult: "Invalid endpoint ID",
+          toolResult: `Service ${purchaseRequest.itemId} not found. Available: ${cambrianEndpoints.slice(0, 5).map(e => e.id).join(', ')}...`,
         });
       }
       
