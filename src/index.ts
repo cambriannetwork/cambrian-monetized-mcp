@@ -344,8 +344,8 @@ export class MCPServer extends MonetizedMCPServer {
   
   constructor() {
     super();
-    // Set the port from environment
-    process.env.PORT = process.env.PORT || '3001';
+    // Set the port from environment - Cloud Run expects 8080
+    process.env.PORT = process.env.PORT || '8080';
     super.runMonetizeMCPServer();
   }
 }
