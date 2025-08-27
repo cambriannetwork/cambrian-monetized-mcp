@@ -44,7 +44,7 @@ async function loadCambrianEndpoints(isRefresh: boolean = false) {
       const attemptMsg = isRefresh ? "Refreshing" : "Loading";
       console.log(`${attemptMsg} Cambrian API endpoints from OpenAPI... (attempt ${4 - retries}/3)`);
       
-      const response = await axios.get("https://opabinia.cambrian.org/openapi.json", {
+      const response = await axios.get("https://opabinia.cambrian.network/openapi.json", {
         timeout: 20000,
         headers: {
           'Accept': 'application/json',
@@ -238,7 +238,7 @@ export class MCPServer extends MonetizedMCPServer {
       
       
       // Build the resource URL for this specific endpoint
-      const baseUrl = process.env.CAMBRIAN_API_BASE_URL || "https://opabinia.cambrian.org";
+      const baseUrl = process.env.CAMBRIAN_API_BASE_URL || "https://opabinia.cambrian.network";
       const resourceUrl = `${baseUrl}${endpoint.path}` as `${string}://${string}`;
       
       // Use verifyAndSettlePayment with the production pattern

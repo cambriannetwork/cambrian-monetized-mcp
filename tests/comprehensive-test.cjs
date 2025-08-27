@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 
-const API_URL = 'https://opabinia.cambrian.org';
+const API_URL = 'https://opabinia.cambrian.network';
 const API_KEY = 'mcp.NHb1BbO2un6dpPzK9GBE';
 
 // Comprehensive list of all Cambrian API endpoints to test

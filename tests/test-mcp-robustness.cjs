@@ -9,7 +9,7 @@ async function testMCPRobustness() {
     {
       name: 'OpenAPI Schema Loading',
       test: async () => {
-        const response = await axios.get('https://opabinia.cambrian.org/openapi.json');
+        const response = await axios.get('https://opabinia.cambrian.network/openapi.json');
         return {
           success: true,
           details: `Loaded ${Object.keys(response.data.paths).length} paths`

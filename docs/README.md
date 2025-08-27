@@ -63,7 +63,7 @@ npm run build
 ```env
 # Cambrian API Configuration
 CAMBRIAN_API_KEY=your_cambrian_api_key
-CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.org
+CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.network
 
 # Payment Configuration
 PAYMENT_RECIPIENT=0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3

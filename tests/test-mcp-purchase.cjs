@@ -31,7 +31,7 @@ async function testMCPPurchase() {
     
     try {
       // First, let's check if the MCP server loads this endpoint
-      const openApiResponse = await axios.get('https://opabinia.cambrian.org/openapi.json');
+      const openApiResponse = await axios.get('https://opabinia.cambrian.network/openapi.json');
       const endpoints = openApiResponse.data.paths;
       
       // Find matching endpoint

@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const CAMBRIAN_API_KEY = process.env.CAMBRIAN_API_KEY;
-const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.org';
+const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.network';
 
 async function testCambrianEndpoints() {
   console.log('🧪 Testing Cambrian API endpoints directly...\n');

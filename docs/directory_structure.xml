@@ -98,7 +98,7 @@ cp .env.production .env
 # IMPORTANT: Replace these placeholder values with your actual credentials:
 # - YOUR_CAMBRIAN_API_KEY: Your actual Cambrian API key
 # - YOUR_PAYMENT_RECIPIENT: Your wallet address (default: 0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3)
-PORT=50133 CAMBRIAN_API_KEY="YOUR_CAMBRIAN_API_KEY" CAMBRIAN_API_BASE_URL="https://opabinia.cambrian.org" PAYMENT_RECIPIENT="YOUR_PAYMENT_RECIPIENT" pm2 start dist/index.js --name "cambrian-monetized-mcp" --time
+PORT=50133 CAMBRIAN_API_KEY="YOUR_CAMBRIAN_API_KEY" CAMBRIAN_API_BASE_URL="https://opabinia.cambrian.network" PAYMENT_RECIPIENT="YOUR_PAYMENT_RECIPIENT" pm2 start dist/index.js --name "cambrian-monetized-mcp" --time
 
 # Wait for startup
 sleep 2
@@ -285,7 +285,7 @@ The Cambrian Monetized MCP server has been successfully deployed to production!
 ### Key Configuration
 - **API Key**: ricky.ovJYjDLpKaoX3Wcu
 - **Payment Recipient**: 0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3
-- **Cambrian API**: https://opabinia.cambrian.org
+- **Cambrian API**: https://opabinia.cambrian.network
 
 ### Management Commands
 
@@ -510,7 +510,7 @@ npm run build
 ```env
 # Cambrian API Configuration
 CAMBRIAN_API_KEY=your_cambrian_api_key
-CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.org
+CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.network
 
 # Payment Configuration
 PAYMENT_RECIPIENT=0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3
@@ -749,7 +749,7 @@ let cambrianEndpoints: CambrianEndpoint[] = [];
 async function loadCambrianEndpoints() {
   try {
     // Loading Cambrian API endpoints from OpenAPI schema
-    const response = await axios.get("https://opabinia.cambrian.org/openapi.json");
+    const response = await axios.get("https://opabinia.cambrian.network/openapi.json");
     const schema = response.data;
     
     const endpoints: CambrianEndpoint[] = [];
@@ -866,7 +866,7 @@ export class MCPServer extends MonetizedMCPServer {
       
       
       // Build the resource URL for this specific endpoint
-      const baseUrl = process.env.CAMBRIAN_API_BASE_URL || "https://opabinia.cambrian.org";
+      const baseUrl = process.env.CAMBRIAN_API_BASE_URL || "https://opabinia.cambrian.network";
       const resourceUrl = `${baseUrl}${endpoint.path}` as `${string}://${string}`;
       
       // Use verifyAndSettlePayment with the production pattern
@@ -1000,7 +1000,7 @@ loadCambrianEndpoints().then(() => {
 const axios = require('axios');
 const fs = require('fs');
 
-const API_URL = 'https://opabinia.cambrian.org';
+const API_URL = 'https://opabinia.cambrian.network';
 const API_KEY = 'mcp.NHb1BbO2un6dpPzK9GBE';
 
 // Comprehensive list of all Cambrian API endpoints to test
@@ -1376,7 +1376,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const CAMBRIAN_API_KEY = process.env.CAMBRIAN_API_KEY;
-const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.org';
+const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.network';
 
 async function testCambrianEndpoints() {
   console.log('🧪 Testing Cambrian API endpoints directly...\n');
@@ -1514,7 +1514,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const CAMBRIAN_API_KEY = process.env.CAMBRIAN_API_KEY;
-const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.org';
+const CAMBRIAN_API_BASE_URL = process.env.CAMBRIAN_API_BASE_URL || 'https://opabinia.cambrian.network';
 
 async function testCorrectEndpoints() {
   console.log('🧪 Testing Cambrian API with CORRECT endpoints...\n');
@@ -1586,7 +1586,7 @@ testCorrectEndpoints().catch(console.error);
 const axios = require('axios');
 
 const MCP_URL = 'https://mcp.rickycambrian.org/monetized';
-const API_URL = 'https://opabinia.cambrian.org';
+const API_URL = 'https://opabinia.cambrian.network';
 
 // Test various endpoint types
 const testCases = [
@@ -1775,7 +1775,7 @@ runTests().then(results => {
 const axios = require('axios');
 
 const MCP_URL = 'https://mcp.rickycambrian.org/monetized';
-const API_URL = 'https://opabinia.cambrian.org';
+const API_URL = 'https://opabinia.cambrian.network';
 
 // Test various endpoint types
 const testCases = [
@@ -2194,7 +2194,7 @@ async function testMCPPurchase() {
     
     try {
       // First, let's check if the MCP server loads this endpoint
-      const openApiResponse = await axios.get('https://opabinia.cambrian.org/openapi.json');
+      const openApiResponse = await axios.get('https://opabinia.cambrian.network/openapi.json');
       const endpoints = openApiResponse.data.paths;
       
       // Find matching endpoint
@@ -2266,7 +2266,7 @@ async function testMCPRobustness() {
     {
       name: 'OpenAPI Schema Loading',
       test: async () => {
-        const response = await axios.get('https://opabinia.cambrian.org/openapi.json');
+        const response = await axios.get('https://opabinia.cambrian.network/openapi.json');
         return {
           success: true,
           details: `Loaded ${Object.keys(response.data.paths).length} paths`
@@ -2641,7 +2641,7 @@ testServer.on('error', (err) => {
 <file path=".env.example">
 # Cambrian API Configuration
 CAMBRIAN_API_KEY=your_cambrian_api_key_here
-CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.org
+CAMBRIAN_API_BASE_URL=https://opabinia.cambrian.network
 
 # Payment Configuration
 PAYMENT_RECIPIENT=0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3

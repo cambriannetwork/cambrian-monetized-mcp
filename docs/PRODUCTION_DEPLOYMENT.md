@@ -13,7 +13,7 @@ The Cambrian Monetized MCP server has been successfully deployed to production!
 ### Key Configuration
 - **API Key**: ricky.ovJYjDLpKaoX3Wcu
 - **Payment Recipient**: 0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3
-- **Cambrian API**: https://opabinia.cambrian.org
+- **Cambrian API**: https://opabinia.cambrian.network
 
 ### Management Commands
 

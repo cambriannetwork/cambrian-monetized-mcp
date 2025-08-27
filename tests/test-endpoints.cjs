@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 const MCP_URL = 'https://mcp.rickycambrian.org/monetized';
-const API_URL = 'https://opabinia.cambrian.org';
+const API_URL = 'https://opabinia.cambrian.network';
 
 // Test various endpoint types
 const testCases = [

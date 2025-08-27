@@ -25,7 +25,7 @@ cp .env.production .env
 # IMPORTANT: Replace these placeholder values with your actual credentials:
 # - YOUR_CAMBRIAN_API_KEY: Your actual Cambrian API key
 # - YOUR_PAYMENT_RECIPIENT: Your wallet address (default: 0x4C3B0B1Cab290300bd5A36AD5f33A607acbD7ac3)
-PORT=50133 CAMBRIAN_API_KEY="YOUR_CAMBRIAN_API_KEY" CAMBRIAN_API_BASE_URL="https://opabinia.cambrian.org" PAYMENT_RECIPIENT="YOUR_PAYMENT_RECIPIENT" pm2 start dist/index.js --name "cambrian-monetized-mcp" --time
+PORT=50133 CAMBRIAN_API_KEY="YOUR_CAMBRIAN_API_KEY" CAMBRIAN_API_BASE_URL="https://opabinia.cambrian.network" PAYMENT_RECIPIENT="YOUR_PAYMENT_RECIPIENT" pm2 start dist/index.js --name "cambrian-monetized-mcp" --time
 
 # Wait for startup
 sleep 2
