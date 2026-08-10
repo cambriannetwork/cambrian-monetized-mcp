@@ -1,0 +1,32 @@
+{
+  "name": "cambrian-mcp-studio",
+  "version": "1.0.0",
+  "description": "Interactive AgentFi Financial Intelligence MCP & X402 Micropayment Studio for Cambrian Network.",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "cambrian-mcp-cli": "./bin/mcp-cli.js"
+  },
+  "scripts": {
+    "start": "node src/server/app.js",
+    "cli": "node bin/mcp-cli.js",
+    "test": "node tests/run-all.js"
+  },
+  "keywords": [
+    "cambrian-network",
+    "mcp",
+    "model-context-protocol",
+    "x402",
+    "micropayments",
+    "agentfi",
+    "ai-agents"
+  ],
+  "author": "Cambrian Network Community",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.13.5",
+    "express": "^4.21.2"
+  }
+}
